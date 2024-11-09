@@ -1,0 +1,12 @@
+. ABC P,Q
+- STA P
+- STB Q
+. LMN R,S
+- ADD R
+- SUB S
+- STA R
+P RESW 1
+Q RESW 1
+R RESW 1
+S RESW 1
+- END –
