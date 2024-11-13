@@ -1,130 +1,122 @@
 #include <stdio.h>
-#include <string.h>
 #include <stdlib.h>
+#include <string.h>
 
-void convert(char h[12]);
-char bitmask[12];
-char bit[12] = {0};
+FILE *input, *output;
 
-void main(){
-    char add[6], length[10], input[10], binary[12], relocbit, ch, pn[5];
-    int start, inp, len, i, address, opcode, addr, actualadd, tlen;
-    FILE *fp1, *fp2;
+void toBinary(char *stringout, char *stringin);
+void toByte(char *byte, char *stringin, int offset);
 
-    printf("\nEnter the actual starting address : ");
-    scanf("%x", &start);
-    
-    fp1 = fopen("input.txt", "r");
-    fp2 = fopen("output.txt", "w");
-    fscanf(fp1, "%s", input);
+void main()
+{
+    char recordtype[3], bitmask[5], bits[13], pgname[10],word[10], byte[4];
+    int actualStart, address, start, end, length, locctr, reclen, instruction;
 
-    while (strcmp(input, "E") != 0){
-        if (strcmp(input, "H") == 0){
-            fscanf(fp1, "%s", pn);
-            fscanf(fp1, "%x", add);
-            fscanf(fp1, "%x", length);
-            fscanf(fp1, "%s", input);
+    printf("Enter the actual start address: ");
+    scanf("%x", &actualStart);
+
+    input = fopen("input.txt", "r");
+    output = fopen("output.txt", "w");
+
+    fscanf(input, "%s", recordtype);
+    while (strcmp(recordtype, "E") != 0)
+    {
+        if (strcmp(recordtype, "H") == 0)
+        {
+            fscanf(input, "%s", pgname);
+            fscanf(input, "%x", &start);
+            fscanf(input, "%x", &end);
         }
-        if (strcmp(input, "T") == 0){
-            fscanf(fp1, "%x", &address);
-            fscanf(fp1, "%x", &tlen);
-            fscanf(fp1, "%s", bitmask);
-            address += start;
-            convert(bitmask);
-            len = strlen(bit);
-            if (len >= 11)
-                len = 10;
-            for (i = 0; i < len; i++){
-                fscanf(fp1, "%x", &opcode);
-                fscanf(fp1, "%x", &addr);
-                relocbit = bit[i];
-                if (relocbit == '0')
-                    actualadd = addr;
-                else
-                    actualadd = addr + start;
-                fprintf(fp2, "\n%x\t\t%x%x", address, opcode, actualadd);
-                address += 3;
+        else if (strcmp(recordtype, "T") == 0)
+        {
+            strcpy(bits,"");
+            fscanf(input, "%x", &locctr);
+            locctr += actualStart;
+
+            fscanf(input, "%x", &reclen);
+            fscanf(input, "%s", bitmask);
+            toBinary(bits,bitmask);
+            for (int i=0; i<reclen/3; i++){
+                fscanf(input,"%x",&instruction);
+                if (bits[i]=='1'){
+                    instruction+=actualStart;
+                }
+                sprintf(word,"%x",instruction);
+                for (int offset=0;offset<6;offset+=2){
+                    toByte(byte,word,offset);
+                    fprintf(output,"%x\t%s\n",locctr++,byte);
+                }
             }
-            fscanf(fp1, "%s", input);
+
         }
+        fscanf(input,"%s",recordtype);
     }
+    fclose(input);
+    fclose(output);
 
-    fclose(fp1);
-    fclose(fp2);
-
-    fp1 = fopen("input.txt", "r");
-    printf("\n\nContents of input file (input.txt):\n\n");
-    ch = fgetc(fp1);
-    while (ch != EOF){
-        printf("%c", ch);
-        ch = fgetc(fp1);
-    }
-    fclose(fp2);
-
-    printf("\n\n The contents of output file (output.txt): \n\n");
-    fp2 = fopen("output.txt", "r");
-    ch = fgetc(fp2);
-    while (ch != EOF){
-        printf("%c", ch);
-        ch = fgetc(fp2);
-    }
-    fclose(fp2);
 }
 
-void convert(char h[12]){
-    int i, l;
-    strcpy(bit, "");
-    l = strlen(h);
-
-    for (i = 0; i < l; i++){
-        switch (h[i]){
+void toByte(char *byte, char *stringin,int offset){
+    byte[0]=stringin[offset];
+    byte[1]=stringin[offset+1];
+    byte[2]='\0';
+}
+void toBinary(char *stringout, char *stringin)
+{
+    int l = strlen(stringin);
+    for (int i = 0; i < l; i++)
+    {
+        switch (stringin[i])
+        {
         case '0':
-            strcat(bit, "0");
+            strcat(stringout, "0000");
             break;
         case '1':
-            strcat(bit, "1");
+            strcat(stringout, "0001");
             break;
         case '2':
-            strcat(bit, "10");
+            strcat(stringout, "0010");
             break;
         case '3':
-            strcat(bit, "11");
+            strcat(stringout, "0011");
             break;
         case '4':
-            strcat(bit, "100");
+            strcat(stringout, "0100");
             break;
         case '5':
-            strcat(bit, "101");
+            strcat(stringout, "0101");
             break;
         case '6':
-            strcat(bit, "110");
+            strcat(stringout, "0100");
             break;
         case '7':
-            strcat(bit, "111");
+            strcat(stringout, "0111");
             break;
         case '8':
-            strcat(bit, "1000");
+            strcat(stringout, "1000");
             break;
         case '9':
-            strcat(bit, "1001");
+            strcat(stringout, "1001");
             break;
         case 'A':
-            strcat(bit, "1010");
+            strcat(stringout, "1010");
             break;
         case 'B':
-            strcat(bit, "1011");
+            strcat(stringout, "1011");
             break;
         case 'C':
-            strcat(bit, "1100");
+            strcat(stringout, "1100");
             break;
         case 'D':
-            strcat(bit, "1101");
+            strcat(stringout, "1101");
             break;
         case 'E':
-            strcat(bit, "1110");
+            strcat(stringout, "1110");
             break;
         case 'F':
-            strcat(bit, "1111");
+            strcat(stringout, "1111");
+            break;
+        default:
             break;
         }
     }
