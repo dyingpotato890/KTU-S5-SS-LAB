@@ -1,6 +1,3 @@
-# KTU S5 SS LAB EXPERIMENTS
-This repo contains programs for 
-
 # KTU S5 SS LAB
 
 This repository contains solutions for various System Software & Microprocessor (CSL331) lab experiments in the KTU curriculum. It also various assembly code for furthur perusal.
