@@ -106,23 +106,27 @@ void processLine(char *label, char *opcode, char *operand, int *location_counter
         fprintf(objectFile, "H^%s^%06X^", label, *location_counter);
         *start_loc = ftell(objectFile);
         fprintf(objectFile, "%06X\n", 0);
-    } else if (strcmp(opcode, "END") == 0) {
+    } 
+    else if (strcmp(opcode, "END") == 0) {
         fprintf(outputFile, "%04X %s %s %s\n", *location_counter, label, opcode, operand);
         fprintf(objectFile, "E^%06X\n", *first_instruction_address);
         fseek(objectFile, *start_loc, SEEK_SET);
         fprintf(objectFile, "%06X\n", *location_counter);
-    } else {
+    } 
+    else {
         char *machine_code = getOpcode(opcode);
         if (machine_code != NULL) {
             int symbol_address = getSymbolAddress(operand);
             if (symbol_address != -1) {
                 fprintf(outputFile, "%04X %s %s %s\n", *location_counter, label, opcode, operand);
                 fprintf(objectFile, "T^%03X^06^%s^%04X\n", *location_counter, machine_code, symbol_address);
-            } else {
+            } 
+            else {
                 if (isdigit(operand[0])) {
                     fprintf(outputFile, "%04X %s %s %s\n", *location_counter, label, opcode, operand);
                     fprintf(objectFile, "T^%06X^03^%s^%s\n", *location_counter, machine_code, operand);
-                } else {
+                } 
+                else {
                     fprintf(outputFile, "%04X %s %s %s\n", *location_counter, label, opcode, operand);
                     fprintf(objectFile, "T^%03X^03^%s", *location_counter, machine_code);
                     addForwardReference(ftell(objectFile), operand);
@@ -130,16 +134,19 @@ void processLine(char *label, char *opcode, char *operand, int *location_counter
                 }
             }
             *location_counter += 3;
-        } else if (strcmp(opcode, "WORD") == 0) {
+        } 
+        else if (strcmp(opcode, "WORD") == 0) {
             fprintf(outputFile, "%04X %s %s %s\n", *location_counter, label, opcode, operand);
             fprintf(objectFile, "T^%06X^03^%06X\n", *location_counter, atoi(operand));
             *location_counter += 3;
-        } else if (strcmp(opcode, "RESW") == 0) {
+        } 
+        else if (strcmp(opcode, "RESW") == 0) {
             int num_words;
             sscanf(operand, "%d", &num_words);
             fprintf(outputFile, "%04X %s %s %s\n", *location_counter, label, opcode, operand);
             *location_counter += 3 * num_words;
-        } else if (strcmp(opcode, "RESB") == 0) {
+        } 
+        else if (strcmp(opcode, "RESB") == 0) {
             int num_bytes;
             sscanf(operand, "%d", &num_bytes);
             fprintf(outputFile, "%04X %s %s %s\n", *location_counter, label, opcode, operand);
