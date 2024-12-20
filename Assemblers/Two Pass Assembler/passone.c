@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-FILE *INPUT, *SYMTAB, *OPTAB, *INTR, *LENGTH;
+FILE *input, *symtab, *optab, *intr, *length;
 
 int searchTable(FILE* file, char check[]){
     char label[10];
@@ -18,34 +18,34 @@ int searchTable(FILE* file, char check[]){
 }
 
 void main(){
-    INPUT = fopen("input.txt", "r");
-    SYMTAB = fopen("symtab.txt", "a+");
-    OPTAB = fopen("optab.txt", "r");
-    INTR = fopen("intermediate.txt", "w");
-    LENGTH = fopen("length.txt", "w");
+    input = fopen("input.txt", "r");
+    symtab = fopen("symtab.txt", "a+");
+    optab = fopen("optab.txt", "r");
+    intr = fopen("intermediate.txt", "w");
+    length = fopen("length.txt", "w");
 
     char label[10], opcode[10], operand[10];
     int startAddress, LOCCTR = 0;
 
-    fscanf(INPUT, "%s %s %x", label, opcode, &startAddress);
+    fscanf(input, "%s %s %x", label, opcode, &startAddress);
 
     if(strcmp(opcode, "START") == 0){
+        fprintf(intr, "%s\t%s\t%x\n", label, opcode, startAddress);
         LOCCTR = startAddress;
-        fprintf(INTR, "%x\t%s\t%s\t%x\n", LOCCTR, label, opcode, startAddress);
-        fscanf(INPUT, "%s %s %s", label, opcode, operand);
+        fscanf(input, "%s %s %s", label, opcode, operand);
     }
 
     while(strcmp(opcode, "END") != 0){
         if (strcmp(label, "") != 0){
-            if(strcmp(label, "**") != 0 && searchTable(SYMTAB, label) == 0){
-                fprintf(SYMTAB, "%s %04x\n", label, LOCCTR);
+            if(strcmp(label, "**") != 0 && searchTable(symtab, label) == 0){
+                fprintf(symtab, "%s %04x\n", label, LOCCTR);
             }
-            else if(searchTable(SYMTAB, label) ==  1){
+            else if(searchTable(symtab, label) ==  1){
                 printf("\nDuplicate Label Entry");
             }
         }
 
-        if(searchTable(OPTAB, opcode) == 1){
+        if(searchTable(optab, opcode) == 1){
             LOCCTR += 3;
         }
         else if(strcmp(opcode, "WORD") == 0){
@@ -63,17 +63,19 @@ void main(){
         else{
             printf("\nInvalid Opcode!\n");
         }
-        fprintf(INTR, "%04x\t%s\t%s\t%s\n", LOCCTR, label, opcode, operand);
-        fscanf(INPUT, "%s %s %s", label, opcode, operand);
-    }
-    fprintf(INTR, "%04x\t%s\t%s\t%s\n", LOCCTR - startAddress, label, opcode, operand);
-    fprintf(LENGTH, "%x", LOCCTR);
 
-    fclose(INPUT);
-    fclose(SYMTAB);
-    fclose(OPTAB);
-    fclose(INTR);
-    fclose(LENGTH);
+        fprintf(intr, "%04x\t%s\t%s\t%s\n", LOCCTR, label, opcode, operand);
+        fscanf(input, "%s %s %s", label, opcode, operand);
+    }
+
+    fprintf(intr, "%04x\t%s\t%s\t%s\n", LOCCTR - startAddress, label, opcode, operand);
+    fprintf(length, "%x", LOCCTR);
+
+    fclose(input);
+    fclose(symtab);
+    fclose(optab);
+    fclose(intr);
+    fclose(length);
 
     puts("Pass 1 Complete!");
 }
