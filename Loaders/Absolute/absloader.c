@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-FILE *INPUT, *OUTPUT;
+FILE *input, *output;
 
 void readByte(char* byte, char* record, int start){
     byte[0] = record[start];
@@ -11,34 +11,34 @@ void readByte(char* byte, char* record, int start){
 }
 
 void main(){
-    INPUT = fopen("input.txt", "r");
-    OUTPUT = fopen("output.txt", "w");
+    input = fopen("input.txt", "r");
+    output = fopen("output.txt", "w");
 
     char recordType[3], pn[10], record[100], byte[3];
     int length, finadr, locctr = 0, offset;
 
-    fscanf(INPUT, "%s", recordType);
+    fscanf(input, "%s", recordType);
 
     while(strcmp(recordType, "E") != 0){
         if(strcmp(recordType, "H") == 0){
-            fscanf(INPUT, "%s", pn);
-            fscanf(INPUT, "%x", &locctr);
-            fscanf(INPUT, "%x", &finadr);
+            fscanf(input, "%s", pn);
+            fscanf(input, "%x", &locctr);
+            fscanf(input, "%x", &finadr);
         }
         else if(strcmp(recordType, "T") == 0){
-            fscanf(INPUT, "%x", &locctr);
-            fscanf(INPUT, "%x", &length);
-            fscanf(INPUT, "%s", record);
+            fscanf(input, "%x", &locctr);
+            fscanf(input, "%x", &length);
+            fscanf(input, "%s", record);
 
             for (offset = 0; offset < strlen(record); offset += 2){
                 readByte(byte, record, offset);
-                fprintf(OUTPUT, "%x\t%s\n", locctr, byte);
+                fprintf(output, "%x\t%s\n", locctr, byte);
                 locctr++;
             }
         }
-        fscanf(INPUT, "%s", recordType);
+        fscanf(input, "%s", recordType);
     }
 
-    fclose(INPUT);
-    fclose(OUTPUT);
+    fclose(input);
+    fclose(output);
 }

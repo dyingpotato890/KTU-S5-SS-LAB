@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-FILE *INTR, *SYMTAB, *LENGTH, *OPTAB, *OBJECT, *OUTPUT;
+FILE *intr, *symtab, *length, *optab, *object, *output;
 
 int searchTable(FILE* file, char check[]) {
     char label[10];
@@ -18,36 +18,36 @@ int searchTable(FILE* file, char check[]) {
 }
 
 void main(){
-    INTR = fopen("intermediate.txt", "r");
-    SYMTAB = fopen("symtab.txt", "r");
-    LENGTH = fopen("length.txt", "r");
-    OPTAB = fopen("optab.txt", "r");
-    OBJECT = fopen("object.txt", "w");
-    OUTPUT = fopen("output.txt", "w");
+    intr = fopen("intermediate.txt", "r");
+    symtab = fopen("symtab.txt", "r");
+    length = fopen("length.txt", "r");
+    optab = fopen("optab.txt", "r");
+    object = fopen("object.txt", "w");
+    output = fopen("output.txt", "w");
 
     int finadr, mnemonic, addr, start, prevaddr, lenloc, currentloc, len, symaddr, LOCCTR;
-    fscanf(LENGTH, "%x", &finadr);
-    fclose(LENGTH);
+    fscanf(length, "%x", &finadr);
+    fclose(length);
 
     char label[10], opcode[10], operand[10];
-    fscanf(INTR, "%x %s %s %s", LOCCTR, label, opcode, operand);
+    fscanf(intr, "%x %s %s %s", LOCCTR, label, opcode, operand);
 
     if (strcmp(opcode, "START") == 0){
-        fprintf(OUTPUT, "%s\t%s\t%s\n", label, opcode, operand);
+        fprintf(output, "%s\t%s\t%s\n", label, opcode, operand);
         sscanf(operand,"%x",&start);
-        fprintf(OBJECT, "H %s %6x %x\n", label, start, finadr - start);
+        fprintf(object, "H %s %6x %x\n", label, start, finadr - start);
     }
-    fscanf(INTR, "%x %s %s %s", &addr, label, opcode, operand);
+    fscanf(intr, "%x %s %s %s", &addr, label, opcode, operand);
 
-    fprintf(OBJECT, "T %06x ", addr);
-    lenloc = ftell(OBJECT);
-    fprintf(OBJECT, "00 ");
+    fprintf(object, "T %06x ", addr);
+    lenloc = ftell(object);
+    fprintf(object, "00 ");
     int remaining = 60;
 
     while (strcmp(opcode, "END") != 0){
         char objcode[20] = "";
-        if ((mnemonic = searchTable(OPTAB, opcode)) != -1){
-            if ((symaddr = searchTable(SYMTAB, operand)) != -1){
+        if ((mnemonic = searchTable(optab, opcode)) != -1){
+            if ((symaddr = searchTable(symtab, operand)) != -1){
                 sprintf(objcode, "%02x%04x ", mnemonic, symaddr);
             }
             else{
@@ -66,61 +66,61 @@ void main(){
         }
         else if (strcmp(opcode, "RESB") == 0){
             int numbytes = atoi(operand);
-            currentloc = ftell(OBJECT);
+            currentloc = ftell(object);
 
-            fseek(OBJECT, lenloc, SEEK_SET);
-            fprintf(OBJECT, "%02x", 60 - remaining);
+            fseek(object, lenloc, SEEK_SET);
+            fprintf(object, "%02x", 60 - remaining);
 
-            fseek(OBJECT, currentloc, SEEK_SET);
-            fprintf(OBJECT, "\nT %06x ", addr + numbytes);
+            fseek(object, currentloc, SEEK_SET);
+            fprintf(object, "\nT %06x ", addr + numbytes);
             remaining = 60;
-            lenloc = ftell(OBJECT);
-            fprintf(OBJECT, "00 ");
+            lenloc = ftell(object);
+            fprintf(object, "00 ");
         }
 
         else if (strcmp(opcode, "RESW") == 0){
             int numbytes = 3 * atoi(operand);
-            currentloc = ftell(OBJECT);
+            currentloc = ftell(object);
 
-            fseek(OBJECT, lenloc, SEEK_SET);
-            fprintf(OBJECT, "%02x", 60 - remaining);
+            fseek(object, lenloc, SEEK_SET);
+            fprintf(object, "%02x", 60 - remaining);
 
-            fseek(OBJECT, currentloc, SEEK_SET);
-            fprintf(OBJECT, "\nT %06x ", addr + numbytes);
+            fseek(object, currentloc, SEEK_SET);
+            fprintf(object, "\nT %06x ", addr + numbytes);
             remaining = 60;
-            lenloc = ftell(OBJECT);
-            fprintf(OBJECT, "00 ");
+            lenloc = ftell(object);
+            fprintf(object, "00 ");
         }
         else if(strcmp(opcode,"END")==0)
             break;
 
         if (strlen(objcode) <= remaining){
-            fprintf(OBJECT, "%s", objcode);
+            fprintf(object, "%s", objcode);
             remaining -= strlen(objcode);
         }
         else{
-            currentloc = ftell(OBJECT);
-            fseek(OBJECT, lenloc, SEEK_SET);
-            fprintf(OBJECT, "%02x", 60 - remaining);
+            currentloc = ftell(object);
+            fseek(object, lenloc, SEEK_SET);
+            fprintf(object, "%02x", 60 - remaining);
 
-            fseek(OBJECT, currentloc, SEEK_SET);
-            fprintf(OBJECT, "\nT %06x ", addr);
+            fseek(object, currentloc, SEEK_SET);
+            fprintf(object, "\nT %06x ", addr);
             remaining = 60;
-            lenloc = ftell(OBJECT);
-            fprintf(OBJECT, "00 ");
-            fprintf(OBJECT, "%s", objcode);
+            lenloc = ftell(object);
+            fprintf(object, "00 ");
+            fprintf(object, "%s", objcode);
             remaining -= strlen(objcode);
         }
-        fprintf(OUTPUT, "%x %s %s %s %s\n", addr, label, opcode, operand, objcode);
-        fscanf(INTR,"%x %s %s %s",&addr,label,opcode,operand);
+        fprintf(output, "%x %s %s %s %s\n", addr, label, opcode, operand, objcode);
+        fscanf(intr,"%x %s %s %s",&addr,label,opcode,operand);
     }
-    fprintf(OBJECT,"\nE %06x",start);
+    fprintf(object,"\nE %06x",start);
        
-    fclose(INTR);
-    fclose(SYMTAB);
-    fclose(OPTAB);
-    fclose(OBJECT);
-    fclose(OUTPUT);
+    fclose(intr);
+    fclose(symtab);
+    fclose(optab);
+    fclose(object);
+    fclose(output);
 
     puts("Pass 2 Complete!");
 }
