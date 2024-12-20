@@ -25,20 +25,20 @@ void main(){
     length = fopen("length.txt", "w");
 
     char label[10], opcode[10], operand[10];
-    int startAddress, LOCCTR = 0;
+    int startAddress, locctr = 0;
 
     fscanf(input, "%s %s %x", label, opcode, &startAddress);
 
     if(strcmp(opcode, "START") == 0){
         fprintf(intr, "%s\t%s\t%x\n", label, opcode, startAddress);
-        LOCCTR = startAddress;
+        locctr = startAddress;
         fscanf(input, "%s %s %s", label, opcode, operand);
     }
 
     while(strcmp(opcode, "END") != 0){
         if (strcmp(label, "") != 0){
             if(strcmp(label, "**") != 0 && searchTable(symtab, label) == 0){
-                fprintf(symtab, "%s %04x\n", label, LOCCTR);
+                fprintf(symtab, "%s %04x\n", label, locctr);
             }
             else if(searchTable(symtab, label) ==  1){
                 printf("\nDuplicate Label Entry");
@@ -46,30 +46,30 @@ void main(){
         }
 
         if(searchTable(optab, opcode) == 1){
-            LOCCTR += 3;
+            locctr += 3;
         }
         else if(strcmp(opcode, "WORD") == 0){
-            LOCCTR += 3;
+            locctr += 3;
         }
         else if(strcmp(opcode, "RESW") == 0){
-            LOCCTR += 3 * atoi(operand);
+            locctr += 3 * atoi(operand);
         }
         else if(strcmp(opcode, "BYTE") == 0){
-            LOCCTR += strlen(operand);
+            locctr += 1;
         }
         else if(strcmp(opcode, "RESB") == 0){
-            LOCCTR += atoi(operand);
+            locctr += atoi(operand);
         }
         else{
             printf("\nInvalid Opcode!\n");
         }
 
-        fprintf(intr, "%04x\t%s\t%s\t%s\n", LOCCTR, label, opcode, operand);
+        fprintf(intr, "%04x\t%s\t%s\t%s\n", locctr, label, opcode, operand);
         fscanf(input, "%s %s %s", label, opcode, operand);
     }
 
-    fprintf(intr, "%04x\t%s\t%s\t%s\n", LOCCTR - startAddress, label, opcode, operand);
-    fprintf(length, "%x", LOCCTR);
+    fprintf(intr, "%04x\t%s\t%s\t%s\n", locctr - startAddress, label, opcode, operand);
+    fprintf(length, "%x", locctr);
 
     fclose(input);
     fclose(symtab);

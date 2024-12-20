@@ -30,11 +30,11 @@ void main(){
     fclose(length);
 
     char label[10], opcode[10], operand[10];
-    fscanf(intr, "%x %s %s %s", LOCCTR, label, opcode, operand);
+    fscanf(intr, "%s %s %s", label, opcode, operand);
 
     if (strcmp(opcode, "START") == 0){
         fprintf(output, "%s\t%s\t%s\n", label, opcode, operand);
-        sscanf(operand,"%x",&start);
+        sscanf(operand, "%x", &start);
         fprintf(object, "H %s %6x %x\n", label, start, finadr - start);
     }
     fscanf(intr, "%x %s %s %s", &addr, label, opcode, operand);
