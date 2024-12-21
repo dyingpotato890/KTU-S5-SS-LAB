@@ -21,7 +21,7 @@ This repository contains solutions for various System Software & Microprocessor 
 3. **Navigate to the Directory:**
     ```bash
     cd KTU-S5-SS-LAB
-
+   ```
 
 ## List of Experiments
 
